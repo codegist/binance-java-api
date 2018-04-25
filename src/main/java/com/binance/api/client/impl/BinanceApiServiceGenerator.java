@@ -4,6 +4,7 @@ import com.binance.api.client.BinanceApiError;
 import com.binance.api.client.constant.BinanceApiConstants;
 import com.binance.api.client.exception.BinanceApiException;
 import com.binance.api.client.security.AuthenticationInterceptor;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import retrofit2.Call;
@@ -19,8 +20,6 @@ import java.lang.annotation.Annotation;
  */
 public class BinanceApiServiceGenerator {
 
-    static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-
     private static Retrofit.Builder builder =
         new Retrofit.Builder()
             .baseUrl(BinanceApiConstants.API_BASE_URL)
@@ -34,12 +33,10 @@ public class BinanceApiServiceGenerator {
 
     public static <S> S createService(Class<S> serviceClass, String apiKey, String secret) {
         if (!StringUtils.isEmpty(apiKey) && !StringUtils.isEmpty(secret)) {
-            AuthenticationInterceptor interceptor = new AuthenticationInterceptor(apiKey, secret);
-            if (!httpClient.interceptors().contains(interceptor)) {
-                httpClient.addInterceptor(interceptor);
-                builder.client(httpClient.build());
-                retrofit = builder.build();
-            }
+            OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
+                                                    .addInterceptor(new HttpLoggingInterceptor(msg -> System.out.println(msg)).setLevel(HttpLoggingInterceptor.Level.BODY))
+                                                    .addInterceptor(new AuthenticationInterceptor(apiKey, secret));
+            retrofit = builder.client(httpClient.build()).build();
         }
         return retrofit.create(serviceClass);
     }
