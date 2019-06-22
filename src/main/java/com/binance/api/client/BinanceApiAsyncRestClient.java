@@ -9,8 +9,10 @@ import com.binance.api.client.domain.account.Order;
 import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.account.TradeHistoryItem;
 import com.binance.api.client.domain.account.WithdrawHistory;
+import com.binance.api.client.domain.account.WithdrawResult;
 import com.binance.api.client.domain.account.request.AllOrdersRequest;
 import com.binance.api.client.domain.account.request.CancelOrderRequest;
+import com.binance.api.client.domain.account.request.CancelOrderResponse;
 import com.binance.api.client.domain.account.request.OrderRequest;
 import com.binance.api.client.domain.account.request.OrderStatusRequest;
 import com.binance.api.client.domain.event.ListenKey;
@@ -69,7 +71,7 @@ public interface BinanceApiAsyncRestClient {
    * Get recent trades (up to last 500). Weight: 1
    *
    * @param symbol ticker symbol (e.g. ETHBTC)
-   * @param limit of last trades (Default 500; max 500.)
+   * @param limit of last trades (Default 500; max 1000.)
    * @param callback the callback that handles the response
    */
   void getTrades(String symbol, Integer limit, BinanceApiCallback<List<TradeHistoryItem>> callback);
@@ -78,7 +80,7 @@ public interface BinanceApiAsyncRestClient {
    * Get older trades. Weight: 5
    *
    * @param symbol ticker symbol (e.g. ETHBTC)
-   * @param limit of last trades (Default 500; max 500.)
+   * @param limit of last trades (Default 500; max 1000.)
    * @param fromId TradeId to fetch from. Default gets most recent trades.
    * @param callback the callback that handles the response
    */
@@ -93,7 +95,7 @@ public interface BinanceApiAsyncRestClient {
    *
    * @param symbol symbol to aggregate (mandatory)
    * @param fromId ID to get aggregate trades from INCLUSIVE (optional)
-   * @param limit Default 500; max 500 (optional)
+   * @param limit Default 500; max 1000 (optional)
    * @param startTime Timestamp in ms to get aggregate trades from INCLUSIVE (optional).
    * @param endTime Timestamp in ms to get aggregate trades until INCLUSIVE (optional).
    * @param callback the callback that handles the response
@@ -113,7 +115,7 @@ public interface BinanceApiAsyncRestClient {
    *
    * @param symbol symbol to aggregate (mandatory)
    * @param interval candlestick interval (mandatory)
-   * @param limit Default 500; max 500 (optional)
+   * @param limit Default 500; max 1000 (optional)
    * @param startTime Timestamp in ms to get candlestick bars from INCLUSIVE (optional).
    * @param endTime Timestamp in ms to get candlestick bars until INCLUSIVE (optional).
    * @param callback the callback that handles the response containing a candlestick bar for the given symbol and interval
@@ -196,7 +198,7 @@ public interface BinanceApiAsyncRestClient {
    * @param cancelOrderRequest order status request parameters
    * @param callback the callback that handles the response
    */
-  void cancelOrder(CancelOrderRequest cancelOrderRequest, BinanceApiCallback<Void> callback);
+  void cancelOrder(CancelOrderRequest cancelOrderRequest, BinanceApiCallback<CancelOrderResponse> callback);
 
   /**
    * Get all open orders on a symbol (asynchronous).
@@ -228,7 +230,7 @@ public interface BinanceApiAsyncRestClient {
    * Get trades for a specific account and symbol.
    *
    * @param symbol symbol to get trades from
-   * @param limit default 500; max 500
+   * @param limit default 500; max 1000
    * @param fromId TradeId to fetch from. Default gets most recent trades.
    * @param callback the callback that handles the response with a list of trades
    */
@@ -238,7 +240,7 @@ public interface BinanceApiAsyncRestClient {
    * Get trades for a specific account and symbol.
    *
    * @param symbol symbol to get trades from
-   * @param limit default 500; max 500
+   * @param limit default 500; max 1000
    * @param callback the callback that handles the response with a list of trades
    */
   void getMyTrades(String symbol, Integer limit, BinanceApiCallback<List<Trade>> callback);
@@ -260,8 +262,9 @@ public interface BinanceApiAsyncRestClient {
    * @param address address to withdraw to
    * @param amount amount to withdraw
    * @param name description/alias of the address
+   * @param addressTag Secondary address identifier for coins like XRP,XMR etc.
    */
-  void withdraw(String asset, String address, String amount, String name, BinanceApiCallback<Void> callback);
+  void withdraw(String asset, String address, String amount, String name, String addressTag, BinanceApiCallback<WithdrawResult> callback);
 
   /**
    * Fetch account deposit history.
