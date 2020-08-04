@@ -1,15 +1,20 @@
 package com.binance.api.client.domain.event;
 
 import com.binance.api.client.constant.BinanceApiConstants;
+import com.binance.api.client.exception.UnsupportedEventException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * User data update event which can be of two types:
- *
+ * User data update event which can be of four types:
+ * <p>
  * 1) outboundAccountInfo, whenever there is a change in the account (e.g. balance of an asset)
- * 2) executionReport, whenever there is a trade or an order
+ * 2) outboundAccountPosition, the change in account balances caused by an event.
+ * 3) executionReport, whenever there is a trade or an order
+ * 4) balanceUpdate, the change in account balance (delta).
+ * <p>
+ * Deserialization could fail with UnsupportedEventException in case of unsupported eventType.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize(using = UserDataUpdateEventDeserializer.class)
@@ -20,6 +25,8 @@ public class UserDataUpdateEvent {
   private long eventTime;
 
   private AccountUpdateEvent accountUpdateEvent;
+
+  private BalanceUpdateEvent balanceUpdateEvent;
 
   private OrderTradeUpdateEvent orderTradeUpdateEvent;
 
@@ -47,6 +54,14 @@ public class UserDataUpdateEvent {
     this.accountUpdateEvent = accountUpdateEvent;
   }
 
+  public BalanceUpdateEvent getBalanceUpdateEvent() {
+    return balanceUpdateEvent;
+  }
+
+  public void setBalanceUpdateEvent(BalanceUpdateEvent balanceUpdateEvent) {
+    this.balanceUpdateEvent = balanceUpdateEvent;
+  }
+
   public OrderTradeUpdateEvent getOrderTradeUpdateEvent() {
     return orderTradeUpdateEvent;
   }
@@ -62,6 +77,10 @@ public class UserDataUpdateEvent {
         .append("eventTime", eventTime);
     if (eventType == UserDataUpdateEventType.ACCOUNT_UPDATE) {
       sb.append("accountUpdateEvent", accountUpdateEvent);
+    } else if (eventType == UserDataUpdateEventType.ACCOUNT_POSITION_UPDATE) {
+      sb.append("accountPositionUpdateEvent", accountUpdateEvent);
+    } else if (eventType == UserDataUpdateEventType.BALANCE_UPDATE) {
+      sb.append("balanceUpdateEvent", balanceUpdateEvent);
     } else {
       sb.append("orderTradeUpdateEvent", orderTradeUpdateEvent);
     }
@@ -70,7 +89,10 @@ public class UserDataUpdateEvent {
 
   public enum UserDataUpdateEventType {
     ACCOUNT_UPDATE("outboundAccountInfo"),
-    ORDER_TRADE_UPDATE("executionReport");
+    ACCOUNT_POSITION_UPDATE("outboundAccountPosition"),
+    BALANCE_UPDATE("balanceUpdate"),
+    ORDER_TRADE_UPDATE("executionReport"),
+    ;
 
     private final String eventTypeId;
 
@@ -87,8 +109,12 @@ public class UserDataUpdateEvent {
         return ACCOUNT_UPDATE;
       } else if (ORDER_TRADE_UPDATE.eventTypeId.equals(eventTypeId)) {
         return ORDER_TRADE_UPDATE;
+      } else if (ACCOUNT_POSITION_UPDATE.eventTypeId.equals(eventTypeId)) {
+        return ACCOUNT_POSITION_UPDATE;
+      } else if (BALANCE_UPDATE.eventTypeId.equals(eventTypeId)) {
+        return BALANCE_UPDATE;
       }
-      throw new IllegalArgumentException("Unrecognized user data update event type id: " + eventTypeId);
+      throw new UnsupportedEventException("Unrecognized user data update event type id: " + eventTypeId);
     }
   }
 }
