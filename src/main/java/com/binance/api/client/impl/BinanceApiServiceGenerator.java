@@ -57,7 +57,7 @@ public class BinanceApiServiceGenerator {
             // `adaptedClient` will use its own interceptor, but share thread pool etc with the 'parent' client
             AuthenticationInterceptor interceptor = new AuthenticationInterceptor(apiKey, secret);
             OkHttpClient adaptedClient = sharedClient.newBuilder()
-                    //.addInterceptor(new HttpLoggingInterceptor(msg -> System.out.println(msg)).setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .addInterceptor(new HttpLoggingInterceptor(msg -> System.out.println(msg)).setLevel(HttpLoggingInterceptor.Level.BODY))
                     .addInterceptor(interceptor).build();
             retrofitBuilder.client(adaptedClient);
         }
