@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.TimeUnit;
 
+import static com.binance.api.client.config.BinanceApiConfig.logRequestBody;
+
 /**
  * Generates a Binance API implementation based on @see {@link BinanceApiService}.
  */
@@ -56,10 +58,11 @@ public class BinanceApiServiceGenerator {
         } else {
             // `adaptedClient` will use its own interceptor, but share thread pool etc with the 'parent' client
             AuthenticationInterceptor interceptor = new AuthenticationInterceptor(apiKey, secret);
-            OkHttpClient adaptedClient = sharedClient.newBuilder()
-                    .addInterceptor(new HttpLoggingInterceptor(msg -> System.out.println(msg)).setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .addInterceptor(interceptor).build();
-            retrofitBuilder.client(adaptedClient);
+            OkHttpClient.Builder adaptedClient = sharedClient.newBuilder();
+            if(logRequestBody){
+                adaptedClient.addInterceptor(new HttpLoggingInterceptor(msg -> System.out.println(msg)).setLevel(HttpLoggingInterceptor.Level.BODY));
+            }
+            retrofitBuilder.client(adaptedClient.addInterceptor(interceptor).build());
         }
 
         Retrofit retrofit = retrofitBuilder.build();
