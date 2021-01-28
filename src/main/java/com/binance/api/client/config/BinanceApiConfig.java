@@ -4,7 +4,7 @@ package com.binance.api.client.config;
  * Configuration used for Binance operations.
  */
 public class BinanceApiConfig {
-	public static final boolean useTestNet = true;
+	public static final boolean useTestNet = false;
 	public static final boolean logRequestBody = false;
 
 	/**
